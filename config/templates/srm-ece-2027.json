@@ -1,0 +1,71 @@
+{
+  "templateName": "SRM ECE Campus to Career 2027",
+  "templateImage": "srm-ece-2027.png",
+  "canvasWidth": 2480,
+  "canvasHeight": 3508,
+  "slotsPerPoster": 6,
+  "fonts": {
+    "bold": "Roboto-Bold.ttf",
+    "regular": "Roboto-Regular.ttf"
+  },
+  "textColors": {
+    "name": "#C8102E",
+    "regNo": "#C8102E",
+    "courseBranch": "#1A1A1A",
+    "company": "#003087",
+    "offerCategory": "#1A1A1A"
+  },
+  "fontSizes": {
+    "name": 44,
+    "regNo": 36,
+    "courseBranch": 36,
+    "company": 40,
+    "offerCategory": 36,
+    "minimum": 14
+  },
+  "lineSpacing": 54,
+  "slots": [
+    {
+      "id": 1,
+      "row": 0,
+      "col": 0,
+      "photo": { "x": 232, "y": 1145, "width": 380, "height": 450 },
+      "text": { "centerX": 422, "startY": 1640, "maxWidth": 550 }
+    },
+    {
+      "id": 2,
+      "row": 0,
+      "col": 1,
+      "photo": { "x": 1072, "y": 1145, "width": 380, "height": 450 },
+      "text": { "centerX": 1262, "startY": 1640, "maxWidth": 550 }
+    },
+    {
+      "id": 3,
+      "row": 0,
+      "col": 2,
+      "photo": { "x": 1860, "y": 1145, "width": 380, "height": 450 },
+      "text": { "centerX": 2050, "startY": 1640, "maxWidth": 550 }
+    },
+    {
+      "id": 4,
+      "row": 1,
+      "col": 0,
+      "photo": { "x": 256, "y": 2115, "width": 380, "height": 450 },
+      "text": { "centerX": 446, "startY": 2610, "maxWidth": 550 }
+    },
+    {
+      "id": 5,
+      "row": 1,
+      "col": 1,
+      "photo": { "x": 1096, "y": 2115, "width": 380, "height": 450 },
+      "text": { "centerX": 1286, "startY": 2610, "maxWidth": 550 }
+    },
+    {
+      "id": 6,
+      "row": 1,
+      "col": 2,
+      "photo": { "x": 1876, "y": 2115, "width": 380, "height": 450 },
+      "text": { "centerX": 2066, "startY": 2610, "maxWidth": 550 }
+    }
+  ]
+}
