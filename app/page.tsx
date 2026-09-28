@@ -629,7 +629,10 @@ function StepGenerate({ students, matchMap, croppedMap, onBack }: Step3Props) {
 
     const pdfBytes = await pdfDoc.save();
 
-    const blob = new Blob([pdfBytes], {
+    const pdfBuffer = new ArrayBuffer(pdfBytes.byteLength);
+    new Uint8Array(pdfBuffer).set(pdfBytes);
+
+    const blob = new Blob([pdfBuffer], {
       type: "application/pdf",
     });
 
