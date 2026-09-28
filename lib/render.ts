@@ -13,8 +13,17 @@ export interface SlotConfig {
   id: number;
   row: number;
   col: number;
-  photo: { x: number; y: number; width: number; height: number };
-  text: { centerX: number; startY: number; maxWidth: number };
+  photo: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  text: {
+    centerX: number;
+    startY: number;
+    maxWidth: number;
+  };
 }
 
 export interface TextColors {
@@ -69,6 +78,7 @@ function estimateTextWidth(
   bold = false
 ): number {
   const charWidthFactor = bold ? 0.58 : 0.52;
+
   return text.length * fontSize * charWidthFactor;
 }
 
@@ -84,9 +94,14 @@ function effectiveFontSize(
   bold = false
 ): number {
   let size = defaultSize;
-  while (size > minSize && estimateTextWidth(text, size, bold) > maxWidth) {
+
+  while (
+    size > minSize &&
+    estimateTextWidth(text, size, bold) > maxWidth
+  ) {
     size -= 1;
   }
+
   return size;
 }
 
@@ -102,11 +117,13 @@ function svgTextLine(
   bold: boolean
 ): string {
   const weight = bold ? "bold" : "normal";
+
   const escaped = text
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+
   return `<text x="${cx}" y="${y}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="${weight}" fill="${color}">${escaped}</text>`;
 }
 
@@ -119,19 +136,31 @@ function buildTextOverlaySVG(
   slots: SlotConfig[],
   config: TemplateConfig
 ): string {
-  const { canvasWidth, canvasHeight, textColors, fontSizes, lineSpacing } =
-    config;
+  const {
+    canvasWidth,
+    canvasHeight,
+    textColors,
+    fontSizes,
+    lineSpacing,
+  } = config;
 
   const lines: string[] = [];
 
   students.forEach((student, i) => {
     const slot = slots[i];
+
     if (!slot) return;
 
-    const { centerX, startY, maxWidth } = slot.text;
+    const {
+      centerX,
+      startY,
+      maxWidth,
+    } = slot.text;
+
     const { minimum } = fontSizes;
 
-    // Line 1: Name — bold, red
+    // ── Line 1: Name — bold, red ────────────────────────────────────────
+
     const nameFontSize = effectiveFontSize(
       student.Name,
       fontSizes.name,
@@ -139,6 +168,7 @@ function buildTextOverlaySVG(
       maxWidth,
       true
     );
+
     lines.push(
       svgTextLine(
         student.Name,
@@ -150,8 +180,10 @@ function buildTextOverlaySVG(
       )
     );
 
-    // Line 2: (RegNo) — bold, red
+    // ── Line 2: Registration Number — bold, red ─────────────────────────
+
     const regNoText = `(${student.RegNo})`;
+
     const regNoFontSize = effectiveFontSize(
       regNoText,
       fontSizes.regNo,
@@ -159,6 +191,7 @@ function buildTextOverlaySVG(
       maxWidth,
       true
     );
+
     lines.push(
       svgTextLine(
         regNoText,
@@ -170,8 +203,10 @@ function buildTextOverlaySVG(
       )
     );
 
-    // Line 3: Course + Branch — regular, black
+    // ── Line 3: Course + Branch — regular, black ─────────────────────────
+
     const courseBranchText = `${student.Course} - ${student.Branch}`;
+
     const cbFontSize = effectiveFontSize(
       courseBranchText,
       fontSizes.courseBranch,
@@ -179,6 +214,7 @@ function buildTextOverlaySVG(
       maxWidth,
       false
     );
+
     lines.push(
       svgTextLine(
         courseBranchText,
@@ -190,7 +226,8 @@ function buildTextOverlaySVG(
       )
     );
 
-    // Line 4: Company — bold, blue
+    // ── Line 4: Company — bold, blue ────────────────────────────────────
+
     const companyFontSize = effectiveFontSize(
       student.Company,
       fontSizes.company,
@@ -198,6 +235,7 @@ function buildTextOverlaySVG(
       maxWidth,
       true
     );
+
     lines.push(
       svgTextLine(
         student.Company,
@@ -209,7 +247,8 @@ function buildTextOverlaySVG(
       )
     );
 
-    // Line 5: OfferCategory — regular, black
+    // ── Line 5: Offer Category — regular, black ─────────────────────────
+
     const offerFontSize = effectiveFontSize(
       student.OfferCategory,
       fontSizes.offerCategory,
@@ -217,6 +256,7 @@ function buildTextOverlaySVG(
       maxWidth,
       false
     );
+
     lines.push(
       svgTextLine(
         student.OfferCategory,
@@ -229,7 +269,9 @@ function buildTextOverlaySVG(
     );
   });
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">${lines.join("")}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${canvasWidth}" height="${canvasHeight}">${lines.join(
+    ""
+  )}</svg>`;
 }
 
 // ─── Main render function ─────────────────────────────────────────────────────
@@ -238,16 +280,20 @@ function buildTextOverlaySVG(
  * Render a single poster page for up to slotsPerPoster students.
  * Returns a PNG buffer at the template's native resolution.
  *
- * @param students  Slice of students for this poster (1–6)
- * @param templateConfig  Loaded template config JSON
- * @param templateImagePath  Absolute path to the template PNG on disk
+ * @param students Slice of students for this poster
+ * @param templateConfig Loaded template config JSON
+ * @param templateImagePath Absolute path to the template PNG on disk
  */
 export async function renderPoster(
   students: StudentForRender[],
   templateConfig: TemplateConfig,
   templateImagePath: string
 ): Promise<Buffer> {
-  const { canvasWidth, canvasHeight, slots } = templateConfig;
+  const {
+    canvasWidth,
+    canvasHeight,
+    slots,
+  } = templateConfig;
 
   // Start with the template background
   let composite = sharp(templateImagePath).ensureAlpha();
@@ -255,29 +301,85 @@ export async function renderPoster(
   // Composite layers: collect all operations
   const compositeOps: OverlayOptions[] = [];
 
-  // ── Photo slots ──────────────────────────────────────────────────────────
+  // ── Photo slots ────────────────────────────────────────────────────────
+
   for (let i = 0; i < students.length; i++) {
     const student = students[i];
     const slot = slots[i];
+
     if (!slot) continue;
 
-    const { x, y, width, height } = slot.photo;
+    const {
+      x,
+      y,
+      width,
+      height,
+    } = slot.photo;
 
-    // Resize student photo to exact slot dimensions (cover, no distortion issue
-    // since we use `fit: cover` which crops to fill)
+    /*
+     * The photo slot represents the OUTER blue rectangle.
+     *
+     * The uploaded photo is deliberately made slightly smaller
+     * so that the blue border from the template remains visible.
+     */
+
+    // Amount of blue border to preserve on each side.
+    const padding = 6;
+
+    // Inner photo dimensions.
+    const photoWidth = Math.max(
+      1,
+      width - padding * 2
+    );
+
+    const photoHeight = Math.max(
+      1,
+      height - padding * 2
+    );
+
+    /*
+     * Standardize EVERY uploaded photo to exactly the same
+     * dimensions.
+     *
+     * rotate()
+     *     Corrects photos taken on phones where the orientation
+     *     is stored in EXIF metadata.
+     *
+     * fit: "cover"
+     *     Maintains aspect ratio.
+     *     Fills the complete photo area.
+     *     Crops excess instead of stretching the image.
+     *
+     * position: "center"
+     *     Centers the crop so different uploaded photos have
+     *     more consistent framing.
+     */
+
     const resizedPhoto = await sharp(student.photoBuffer)
-      .resize(width, height, { fit: "cover", position: "top" })
+      .rotate()
+      .resize(photoWidth, photoHeight, {
+        fit: "cover",
+        position: "center",
+      })
       .png()
       .toBuffer();
 
+    /*
+     * Place the photo inside the blue rectangle.
+     *
+     * The padding is added to x and y so the photo does not
+     * cover the blue border.
+     */
+
     compositeOps.push({
       input: resizedPhoto,
-      left: x,
-      top: y,
+      left: x + padding,
+      top: y + padding,
     });
   }
 
   // ── Text overlay (single SVG over the whole canvas) ──────────────────────
+
   const svgText = buildTextOverlaySVG(
     students,
     slots,
@@ -290,25 +392,37 @@ export async function renderPoster(
     left: 0,
   });
 
-  // Apply all composites at once
+  // ── Apply all composites at once ─────────────────────────────────────────
+
   const outputBuffer = await composite
     .composite(compositeOps)
-    .png({ compressionLevel: 6 })
+    .png({
+      compressionLevel: 6,
+    })
     .toBuffer();
 
   return outputBuffer;
 }
 
+// ─── Template configuration loader ───────────────────────────────────────────
+
 /**
  * Load a template config from disk by name.
  */
-export function loadTemplateConfig(templateName: string): TemplateConfig {
+export function loadTemplateConfig(
+  templateName: string
+): TemplateConfig {
   const configPath = path.join(
     process.cwd(),
     "config",
     "templates",
     `${templateName}.json`
   );
-  const raw = fs.readFileSync(configPath, "utf-8");
+
+  const raw = fs.readFileSync(
+    configPath,
+    "utf-8"
+  );
+
   return JSON.parse(raw) as TemplateConfig;
 }
