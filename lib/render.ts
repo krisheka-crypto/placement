@@ -124,7 +124,7 @@ function svgTextLine(
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-  return `<text x="${cx}" y="${y}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="${fontSize}" font-weight="${weight}" fill="${color}">${escaped}</text>`;
+  return `<text x="${cx}" y="${y}" text-anchor="middle" font-family="DejaVu Sans" font-size="${fontSize}" font-weight="${weight}" fill="${color}">${escaped}</text>`;
 }
 
 /**
