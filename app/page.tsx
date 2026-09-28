@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
 import Papa from "papaparse";
 import JSZip from "jszip";
+import { PDFDocument } from "pdf-lib";
 import { validateCSV, StudentRow, ValidationError } from "@/lib/validate";
 import { matchPhotos, classifyMatches, MatchResult } from "@/lib/match";
 import PhotoCropper from "@/app/components/PhotoCropper";
@@ -599,34 +600,53 @@ function StepGenerate({ students, matchMap, croppedMap, onBack }: Step3Props) {
   };
 
   const downloadPdf = async () => {
-    setExportingPdf(true);
-    try {
-      const res = await fetch("/api/export-pdf", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          posters,
-          canvasWidth: CANVAS_WIDTH,
-          canvasHeight: CANVAS_HEIGHT,
-          dpi: 300,
-        }),
+  setExportingPdf(true);
+
+  try {
+    const pdfDoc = await PDFDocument.create();
+
+    const ptsPerPx = 72 / 300;
+    const pageWidth = CANVAS_WIDTH * ptsPerPx;
+    const pageHeight = CANVAS_HEIGHT * ptsPerPx;
+
+    for (const base64 of posters) {
+      const pngBytes = Uint8Array.from(
+        atob(base64),
+        (c) => c.charCodeAt(0)
+      );
+
+      const pngImage = await pdfDoc.embedPng(pngBytes);
+
+      const page = pdfDoc.addPage([pageWidth, pageHeight]);
+
+      page.drawImage(pngImage, {
+        x: 0,
+        y: 0,
+        width: pageWidth,
+        height: pageHeight,
       });
-
-      if (!res.ok) throw new Error("PDF export failed");
-
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "placement-posters.pdf";
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(String(err));
-    } finally {
-      setExportingPdf(false);
     }
-  };
+
+    const pdfBytes = await pdfDoc.save();
+
+    const blob = new Blob([pdfBytes], {
+      type: "application/pdf",
+    });
+
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "placement-posters.pdf";
+    link.click();
+
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    setError(String(err));
+  } finally {
+    setExportingPdf(false);
+  }
+};
 
   return (
     <div className="card animate-in">
